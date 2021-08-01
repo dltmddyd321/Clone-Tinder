@@ -17,6 +17,7 @@ import com.facebook.login.widget.LoginButton
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import javax.security.auth.callback.Callback
 
@@ -49,7 +50,7 @@ class LoginActivity: AppCompatActivity() {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
-                        finish()
+                        successLogin()
                         //위 행동이 성공적이라면 해당 Activity 종료
                     } else {
                         Toast.makeText(this, "로그인에 실패! 이메일 또는 비밀번호 재확인 요구.",Toast.LENGTH_SHORT).show()
@@ -89,7 +90,7 @@ class LoginActivity: AppCompatActivity() {
                 auth.signInWithCredential(credential)
                     .addOnCompleteListener(this@LoginActivity) { task ->
                         if (task.isSuccessful) {
-                            finish()
+                            successLogin()
                         }else {
                             Toast.makeText(this@LoginActivity, "페이스북 로그인 실패!",Toast.LENGTH_SHORT).show()
                         }
@@ -140,6 +141,24 @@ class LoginActivity: AppCompatActivity() {
         //콜백 매니저를 이용한 결과창 반환을 위한 메소드
 
         callbackManager.onActivityResult(requestCode, resultCode, data)
+    }
+
+    private fun successLogin() {
+        if(auth.currentUser == null) {
+            Toast.makeText(this, "로그인에 실패!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val userId = auth.currentUser?.uid.orEmpty()
+        val currentUserDB = Firebase.database.reference.child("Users").child(userId)
+        //Users라는 데이터베이스의 userId 데이터 호출
+
+        val user = mutableMapOf<String,Any>()
+        user["userId"] = userId
+        currentUserDB.updateChildren(user)
+        //user의 ID 업데이트
+
+        finish()
     }
 
 }

@@ -21,6 +21,8 @@ class MainActivity : AppCompatActivity() {
         if(auth.currentUser == null) {
             startActivity(Intent(this,LoginActivity::class.java))
             //만일 로그인이 되어있지 않다면 로그인 진행 화면으로 이동
+        } else {
+            startActivity(Intent(this,LikeActivity::class.java))
         }
     }
 }
